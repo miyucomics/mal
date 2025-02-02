@@ -1,5 +1,6 @@
 import readline
 from reader import read_str
+from printer import pr_str
 from mal_types import AtomType, FunctionAtom, MapAtom, NilAtom, SymbolAtom, VectorAtom
 from core import core
 from env import Env
@@ -16,7 +17,7 @@ def eval(ast, env):
     if "DEBUG-EVAL" in env.data:
         state = env.data["DEBUG-EVAL"]
         if state.value is not False and state.type() != AtomType.NIL:
-            print("EVAL:", ast)
+            print("EVAL:", pr_str(ast, True))
 
     if ast.type() == AtomType.SYMBOL:
         return env.get(ast)
@@ -72,7 +73,7 @@ def eval(ast, env):
 def rep(arg):
     ast = read_str(arg)
     result = eval(ast, repl_env)
-    return str(result)
+    return pr_str(result, True)
 
 rep("(def! not (fn* (a) (if a false true)))")
 
