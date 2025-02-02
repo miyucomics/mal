@@ -1,19 +1,10 @@
 import readline
 from reader import read_str
-
-def READ(arg):
-    return read_str(arg)
-
-def EVAL(arg):
-    return arg
-
-def PRINT(arg):
-    return str(arg)
+from printer import pr_str
 
 def rep(arg):
-    ast = READ(arg)
-    result = EVAL(ast)
-    return PRINT(result)
+    ast = read_str(arg)
+    return pr_str(ast, True)
 
 readline.set_auto_history(True)
 while True:

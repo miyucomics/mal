@@ -1,4 +1,5 @@
-from mal_types import AtomType, BooleanAtom, IntAtom, ListAtom, ListLikeAtom
+from mal_types import AtomType, BooleanAtom, IntAtom, ListAtom, ListLikeAtom, NilAtom, StringAtom
+from printer import pr_str
 
 def get(args, index):
     if index >= len(args):
@@ -44,6 +45,14 @@ def empty(args):
         return BooleanAtom(len(get(args, 0).as_list()) == 0)
     return BooleanAtom(False)
 
+def prn(args):
+    print(" ".join(pr_str(arg, True) for arg in args))
+    return NilAtom()
+
+def println(args):
+    print(" ".join(pr_str(arg, False) for arg in args))
+    return NilAtom()
+
 core = {
     "+": lambda args: biinteger_operation(args, lambda a, b: IntAtom(a + b)),
     "-": lambda args: biinteger_operation(args, lambda a, b: IntAtom(a - b)),
@@ -60,4 +69,9 @@ core = {
     ">": lambda args: biinteger_operation(args, lambda a, b: BooleanAtom(a > b)),
     "<=": lambda args: biinteger_operation(args, lambda a, b: BooleanAtom(a <= b)),
     ">=": lambda args: biinteger_operation(args, lambda a, b: BooleanAtom(a >= b)),
+
+    "prn": prn,
+    "pr-str": lambda args: StringAtom(" ".join(pr_str(arg, True) for arg in args)),
+    "str": lambda args: StringAtom("".join(pr_str(arg, False) for arg in args)),
+    "println": println
 }

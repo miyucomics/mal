@@ -1,5 +1,11 @@
 from mal_types import BooleanAtom, IntAtom, KeywordAtom, ListAtom, MapAtom, NilAtom, StringAtom, SymbolAtom, VectorAtom
 
+string_contractions = {
+    "\\n": "\n",
+    '\\"': '"',
+    "\\\\": "\\",
+}
+
 def read_str(code: str):
     tokens = tokenize(code)
     reader = Reader(tokens)
@@ -52,7 +58,7 @@ def tokenize(code: str):
             while position < len(code):
                 new_char = code[position]
                 if new_char == "\\":
-                    token += code[position:position + 2]
+                    token += string_contractions[code[position:position + 2]]
                     position += 2
                     continue
                 if new_char == '"':

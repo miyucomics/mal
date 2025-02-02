@@ -1,5 +1,6 @@
 import readline
 from reader import read_str
+from printer import pr_str
 from mal_types import AtomType, FunctionAtom, IntAtom, VectorAtom, MapAtom
 
 def biinteger_operation(args, op):
@@ -44,7 +45,7 @@ def EVAL(ast, env):
 def rep(arg):
     ast = read_str(arg)
     result = EVAL(ast, repl_env)
-    return str(result)
+    return pr_str(result, True)
 
 readline.set_auto_history(True)
 while True:

@@ -84,9 +84,6 @@ class StringAtom(Atom):
     def type(self) -> AtomType:
         return AtomType.STRING
 
-    def __str__(self) -> str:
-        return f'"{self.value}"'
-
 @dataclass(frozen=True)
 class KeywordAtom(Atom):
     value: str
@@ -122,9 +119,6 @@ class MapAtom(Atom):
             raise TypeError(f"Unhashable key type: {type(key).__name__}")
         self.value[key] = value
 
-    def __str__(self) -> str:
-        return "{" + " ".join(f"{key} {value}" for key, value in self.value.items()) + "}"
-
 class ListLikeAtom(Atom):
     def as_list(self) -> list:
         return self.value
@@ -142,9 +136,6 @@ class ListAtom(ListLikeAtom):
     def push(self, iota: Atom):
         self.value.append(iota)
 
-    def __str__(self) -> str:
-        return "(" + " ".join(map(str, self.value)) + ")"
-
 @dataclass
 class VectorAtom(ListLikeAtom):
     value: list[Atom] = None
@@ -157,6 +148,3 @@ class VectorAtom(ListLikeAtom):
 
     def push(self, iota: Atom):
         self.value.append(iota)
-
-    def __str__(self) -> str:
-        return "[" + " ".join(map(str, self.value)) + "]"
