@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Any
 
 class AtomType(Enum):
+    ATOM = auto()
     BOOLEAN = auto()
     FUNCTION = auto()
     INT = auto()
@@ -31,6 +32,19 @@ class Atom:
 
     def __str__(self) -> str:
         raise NotImplementedError()
+
+@dataclass
+class AtomAtom(Atom):
+    value: Atom
+
+    def type(self) -> AtomType:
+        return AtomType.ATOM
+
+    def truthy(self) -> bool:
+        return self.value.truthy()
+
+    def __str__(self) -> str:
+        return f"(atom {self.value})"
 
 class NilAtom(Atom):
     value = None
@@ -92,7 +106,7 @@ class KeywordAtom(Atom):
         return AtomType.KEYWORD
 
     def __str__(self) -> str:
-        return f':{self.value[1]}'
+        return f':{self.value[1:]}'
 
 @dataclass
 class FunctionAtom(Atom):
