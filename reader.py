@@ -75,9 +75,11 @@ def tokenize(code: str):
             position += 1
             while position < len(code):
                 new_char = code[position]
+                if new_char == '\n':
+                    position += 1
+                    break
                 token += new_char
                 position += 1
-            tokens.append(token)
 
         token = ""
         while position < len(code):

@@ -1,4 +1,5 @@
-from mal_types import AtomType, BooleanAtom, IntAtom, ListAtom, ListLikeAtom, NilAtom, StringAtom
+from mal_types import AtomType, AtomAtom, BooleanAtom, IntAtom, ListAtom, ListLikeAtom, NilAtom, StringAtom
+from reader import read_str
 from printer import pr_str
 
 def get(args, index):
@@ -53,6 +54,30 @@ def println(args):
     print(" ".join(pr_str(arg, False) for arg in args))
     return NilAtom()
 
+def slurp(args):
+    filename = treat_as(get(args, 0), AtomType.STRING)
+    with open(filename, "r") as file:
+        content = file.read()
+        return StringAtom(content)
+    return NilAtom()
+
+def atom_reset(args):
+    atom = get(args, 0)
+    treat_as(atom, AtomType.ATOM)
+    new = get(args, 1)
+    atom.value = new
+    return new
+
+def atom_swap(args):
+    atom = get(args, 0)
+    treat_as(atom, AtomType.ATOM)
+    func = get(args, 1)
+    if type(func) is dict:
+        func = func["fn"]
+    new = treat_as(func, AtomType.FUNCTION)([atom.value] + args[2:])
+    atom.value = new
+    return new
+
 core = {
     "+": lambda args: biinteger_operation(args, lambda a, b: IntAtom(a + b)),
     "-": lambda args: biinteger_operation(args, lambda a, b: IntAtom(a - b)),
@@ -73,5 +98,14 @@ core = {
     "prn": prn,
     "pr-str": lambda args: StringAtom(" ".join(pr_str(arg, True) for arg in args)),
     "str": lambda args: StringAtom("".join(pr_str(arg, False) for arg in args)),
-    "println": println
+    "println": println,
+
+    "read-string": lambda args: read_str(treat_as(get(args, 0), AtomType.STRING)),
+    "slurp": slurp,
+
+    "atom": lambda args: AtomAtom(get(args, 0)),
+    "atom?": lambda args: BooleanAtom(get(args, 0).type() == AtomType.ATOM),
+    "deref": lambda args: treat_as(get(args, 0), AtomType.ATOM),
+    "reset!": atom_reset,
+    "swap!": atom_swap,
 }

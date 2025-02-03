@@ -1,10 +1,11 @@
 import readline
 from reader import read_str
 from printer import pr_str
-from mal_types import AtomType, FunctionAtom, MapAtom, NilAtom, SymbolAtom, VectorAtom
+from mal_types import AtomType, FunctionAtom, ListAtom, MapAtom, NilAtom, SymbolAtom, VectorAtom
 from core import core
 from env import Env
 from os.path import exists
+import sys
 
 if exists("./history.txt"):
     readline.read_history_file("./history.txt")
@@ -12,6 +13,7 @@ if exists("./history.txt"):
 repl_env = Env()
 for key, value in core.items():
     repl_env.set(SymbolAtom(key), FunctionAtom(value))
+repl_env.set(SymbolAtom('*ARGV*'), ListAtom(sys.argv[2:]))
 
 def eval_def(ast, env):
     data = ast.value
@@ -93,7 +95,7 @@ def EVAL(ast, env):
                 ast = op["ast"]
                 env = Env(op["env"], op["params"], new[1:])
                 continue
-            if op.type() == AtomType.FUNCTION:
+            elif op.type() == AtomType.FUNCTION:
                 return op.value(new[1:])
         else:
             return ast
@@ -103,7 +105,14 @@ def rep(arg):
     result = EVAL(ast, repl_env)
     return pr_str(result, True)
 
-rep("(def! not (fn* (a) (if a false true)))")
+repl_env.set(SymbolAtom("eval"), FunctionAtom(lambda ast: EVAL(ast[0], repl_env)))
+rep('(def! not (fn* (a) (if a false true)))')
+rep('(def! load-file (fn* (f) (eval (read-string (str "(do " (slurp f) "\nnil)")))))')
+
+if len(sys.argv) > 1:
+    path = sys.argv[1]
+    rep(f'(load-file "{path}")')
+    exit()
 
 readline.set_auto_history(True)
 while True:
