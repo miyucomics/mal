@@ -1,7 +1,7 @@
 import readline
 from reader import read_str
 from printer import pr_str
-from mal_types import AtomType, FunctionAtom, ListAtom, MapAtom, NilAtom, SymbolAtom, VectorAtom
+from mal_types import AtomType, FunctionAtom, ListAtom, MapAtom, NilAtom, SymbolAtom, VectorAtom, StringAtom
 from core import core
 from env import Env
 from os.path import exists
@@ -13,7 +13,10 @@ if exists("./history.txt"):
 repl_env = Env()
 for key, value in core.items():
     repl_env.set(SymbolAtom(key), FunctionAtom(value))
-repl_env.set(SymbolAtom('*ARGV*'), ListAtom(sys.argv[2:]))
+env_args = ListAtom()
+for arg in sys.argv[2:]:
+    env_args.push(StringAtom(arg))
+repl_env.set(SymbolAtom('*ARGV*'), env_args)
 
 def eval_def(ast, env):
     data = ast.value
