@@ -165,5 +165,5 @@ def read_atom(reader: Reader):
     if token.isdigit() or (token[0] == "-" and token[1:].isdigit()):
         return IntAtom(int(token))
     if token.startswith(":"):
-        return KeywordAtom(token[1:])
+        return KeywordAtom("\u029E" + token[1:])
     return SymbolAtom(token)

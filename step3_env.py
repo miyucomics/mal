@@ -18,6 +18,23 @@ repl_env.set(SymbolAtom("-"), FunctionAtom(lambda args: biinteger_operation(args
 repl_env.set(SymbolAtom("*"), FunctionAtom(lambda args: biinteger_operation(args, lambda a, b: a * b)))
 repl_env.set(SymbolAtom("/"), FunctionAtom(lambda args: biinteger_operation(args, lambda a, b: a // b)))
 
+def eval_def(data, env):
+    value = eval(data[2], repl_env)
+    repl_env.set(data[1], value)
+    return value
+
+def eval_let(data, env):
+    new_env = Env(env)
+    binds = data[1].value
+    for i in range(len(binds) // 2):
+        new_env.set(binds[i * 2], eval(binds[i * 2 + 1], new_env))
+    return eval(data[2], new_env)
+
+special_forms = {
+    "def!": eval_def,
+    "let*": eval_let
+}
+
 def eval(ast, env):
     if "DEBUG-EVAL" in env.data:
         state = env.data["DEBUG-EVAL"]
@@ -36,22 +53,13 @@ def eval(ast, env):
             new.value[key] = eval(value, env)
         return new
     elif ast.type() == AtomType.LIST:
-        if len(ast.value) == 0:
+        data = ast.value
+        if len(data) == 0:
             return ast
+        if isinstance(data[0], SymbolAtom) and data[0].value in special_forms:
+            return special_forms[data[0].value](data, env)
 
-        if ast.value[0].value == "def!":
-            value = eval(ast.value[2], repl_env)
-            repl_env.set(ast.value[1], value)
-            return value
-
-        if ast.value[0].value == "let*":
-            new_env = Env(env)
-            binds = ast.value[1].value
-            for i in range(len(binds) // 2):
-                new_env.set(binds[i * 2], eval(binds[i * 2 + 1], new_env))
-            return eval(ast.value[2], new_env)
-
-        new = [eval(item, env) for item in ast.value]
+        new = [eval(item, env) for item in data]
         op = new[0]
         assert op.type() == AtomType.FUNCTION, "First item of list should be valid symbol"
         return op.value(new[1:])
