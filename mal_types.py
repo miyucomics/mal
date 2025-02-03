@@ -92,7 +92,7 @@ class KeywordAtom(Atom):
         return AtomType.KEYWORD
 
     def __str__(self) -> str:
-        return f':{self.value}'
+        return f':{self.value[1]}'
 
 @dataclass
 class FunctionAtom(Atom):

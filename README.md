@@ -1,0 +1,1 @@
+This is my personal attempt at making a lisp, following MAL. It is done in Python3, attempting to use minimal external code even from the standard library for educational purposes, and is likely not particularly fast. All code here is under MIT License should you want it for some reason.
