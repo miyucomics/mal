@@ -1,7 +1,7 @@
 import readline
 from reader import read_str
 from printer import pr_str
-from mal_types import AtomType, FunctionAtom, ListAtom, MapAtom, NilAtom, SymbolAtom, VectorAtom, StringAtom
+from mal_types import AtomType, FunctionAtom, ListAtom, MapAtom, NilAtom, SymbolAtom, VectorAtom, StringAtom, ListLikeAtom
 from core import core
 from env import Env
 from os.path import exists
@@ -56,12 +56,40 @@ def eval_fn(ast, env):
         "fn": FunctionAtom(lambda args: EVAL(data[2], Env(env, data[1].value, args)))
     }
 
+def eval_quote(ast, env):
+    return ast, env, ast.value[1]
+
+def quasiquote(ast):
+    if isinstance(ast, ListAtom) and len(ast.value) > 0:
+        if isinstance(ast.value[0], SymbolAtom) and ast.value[0].value == "unquote":
+            return ast.value[1]
+
+    if isinstance(ast, ListLikeAtom):
+        result = ListAtom()
+        for element in reversed(ast.value):
+            if isinstance(element, ListAtom) and len(element.value) > 0:
+                if isinstance(element.value[0], SymbolAtom) and element.value[0].value == "splice-unquote":
+                    result = ListAtom([SymbolAtom("concat"), element.value[1], result])
+                    continue
+            result = ListAtom([SymbolAtom("cons"), quasiquote(element), result])
+        return result
+
+    if isinstance(ast, (SymbolAtom, MapAtom)):
+        return ListAtom([SymbolAtom("quote"), ast])
+
+    return ast
+
+def eval_quasiquote(ast, env):
+    return quasiquote(ast.value[1]), env, None
+
 special_forms = {
     "def!": eval_def,
     "let*": eval_let,
     "do": eval_do,
     "if": eval_if,
     "fn*": eval_fn,
+    "quote": eval_quote,
+    "quasiquote": eval_quasiquote,
 }
 
 def EVAL(ast, env):

@@ -78,6 +78,22 @@ def atom_swap(args):
     atom.value = new
     return new
 
+def cons(args):
+    head = get(args, 0)
+    tail = get(args, 1)
+    if isinstance(tail, ListLikeAtom):
+        return ListAtom([head] + tail.as_list())
+    raise ValueError("cons needs a list as the second argument.")
+
+def concat(args):
+    result = []
+    for arg in args:
+        if isinstance(arg, ListLikeAtom):
+            result += arg.as_list()
+        else:
+            raise ValueError("concat takes only lists for arguments.")
+    return ListAtom(result)
+
 core = {
     "+": lambda args: biinteger_operation(args, lambda a, b: IntAtom(a + b)),
     "-": lambda args: biinteger_operation(args, lambda a, b: IntAtom(a - b)),
@@ -108,4 +124,7 @@ core = {
     "deref": lambda args: treat_as(get(args, 0), AtomType.ATOM),
     "reset!": atom_reset,
     "swap!": atom_swap,
+
+    "cons": cons,
+    "concat": concat,
 }
