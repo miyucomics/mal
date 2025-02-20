@@ -2,6 +2,10 @@ import readline
 from reader import read_str
 from printer import pr_str
 from mal_types import AtomType, FunctionAtom, IntAtom, VectorAtom, MapAtom
+from os.path import exists
+
+if exists("./history.txt"):
+    readline.read_history_file("./history.txt")
 
 def biinteger_operation(args, op):
     assert len(args) == 2
@@ -51,6 +55,7 @@ readline.set_auto_history(True)
 while True:
     try:
         result = rep(input("user> "))
+        readline.write_history_file("./history.txt")
     except EOFError:
         print("EOF")
     except AssertionError as error:
