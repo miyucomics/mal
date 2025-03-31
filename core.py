@@ -1,4 +1,4 @@
-from mal_types import AtomType, AtomAtom, BooleanAtom, IntAtom, ListAtom, ListLikeAtom, NilAtom, StringAtom
+from mal_types import AtomType, AtomAtom, BooleanAtom, IntAtom, ListAtom, ListLikeAtom, NilAtom, StringAtom, VectorAtom
 from reader import read_str
 from printer import pr_str
 
@@ -127,4 +127,5 @@ core = {
 
     "cons": cons,
     "concat": concat,
+    "vec": lambda args: args[0] if isinstance(args[0], VectorAtom) else VectorAtom(get(args, 0).as_list()[:]),
 }

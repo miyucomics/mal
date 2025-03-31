@@ -72,6 +72,10 @@ def quasiquote(ast):
                     result = ListAtom([SymbolAtom("concat"), element.value[1], result])
                     continue
             result = ListAtom([SymbolAtom("cons"), quasiquote(element), result])
+
+        if isinstance(ast, VectorAtom):
+            return ListAtom([SymbolAtom("vec"), result])
+
         return result
 
     if isinstance(ast, (SymbolAtom, MapAtom)):
