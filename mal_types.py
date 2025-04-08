@@ -111,6 +111,7 @@ class KeywordAtom(Atom):
 @dataclass
 class FunctionAtom(Atom):
     value: Any
+    is_macro: bool = False
 
     def type(self) -> AtomType:
         return AtomType.FUNCTION
