@@ -20,8 +20,8 @@ repl_env.set(SymbolAtom('*ARGV*'), env_args)
 
 def eval_def(ast, env):
     data = ast.value
-    value = EVAL(data[2], repl_env)
-    repl_env.set(data[1], value)
+    value = EVAL(data[2], env)
+    env.set(data[1], value)
     return ast, env, value
 
 def eval_let(ast, env):
@@ -88,12 +88,12 @@ def eval_quasiquote(ast, env):
 
 def eval_defmacro(ast, env):
     data = ast.value
-    value = EVAL(data[2], repl_env)
+    value = EVAL(data[2], env)
     if isinstance(value, FunctionAtom):
         value.is_macro = True
     elif type(value) is dict:
         value["is_macro"] = True
-    repl_env.set(data[1], value)
+    env.set(data[1], value)
     return ast, env, value
 
 special_forms = {
