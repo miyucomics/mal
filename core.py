@@ -1,4 +1,4 @@
-from mal_types import AtomType, AtomAtom, BooleanAtom, IntAtom, ListAtom, ListLikeAtom, NilAtom, StringAtom, VectorAtom
+from mal_types import AtomType, AtomAtom, BooleanAtom, FunctionAtom, IntAtom, ListAtom, ListLikeAtom, NilAtom, StringAtom, VectorAtom
 from reader import read_str
 from printer import pr_str
 
@@ -151,4 +151,8 @@ core = {
     "nth": nth,
     "first": first,
     "rest": rest,
+    "macro?": lambda args: BooleanAtom(
+        (isinstance(get(args, 0), FunctionAtom) and get(args, 0).is_macro) or
+        (type(get(args, 0)) is dict and get(args, 0).get("is_macro", False))
+    ),
 }
