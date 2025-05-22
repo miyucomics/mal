@@ -94,6 +94,25 @@ def concat(args):
             raise ValueError("concat takes only lists for arguments.")
     return ListAtom(result)
 
+def nth(args):
+    sequence = get(args, 0)
+    index = treat_as(get(args, 1), AtomType.INT)
+    if not isinstance(sequence, ListLikeAtom) or index >= len(sequence.as_list()):
+        raise ValueError("nth needs a list and an index in range")
+    return sequence.as_list()[index]
+
+def first(args):
+    sequence = get(args, 0)
+    if isinstance(sequence, NilAtom) or (isinstance(sequence, ListLikeAtom) and len(sequence.as_list()) == 0):
+        return NilAtom()
+    return sequence.as_list()[0]
+
+def rest(args):
+    seq = get(args, 0)
+    if isinstance(seq, NilAtom) or (isinstance(seq, ListLikeAtom) and len(seq.as_list()) == 0):
+        return ListAtom()
+    return ListAtom(seq.as_list()[1:])
+
 core = {
     "+": lambda args: biinteger_operation(args, lambda a, b: IntAtom(a + b)),
     "-": lambda args: biinteger_operation(args, lambda a, b: IntAtom(a - b)),
@@ -128,4 +147,8 @@ core = {
     "cons": cons,
     "concat": concat,
     "vec": lambda args: args[0] if isinstance(args[0], VectorAtom) else VectorAtom(get(args, 0).as_list()[:]),
+
+    "nth": nth,
+    "first": first,
+    "rest": rest,
 }
