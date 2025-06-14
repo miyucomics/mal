@@ -137,9 +137,17 @@ class MapAtom(Atom):
             raise TypeError(f"Unhashable key type: {type(key).__name__}")
         self.value[key] = value
 
+    def __str__(self):
+        contents = " ".join(map(lambda x: f"{str(x)} {str(self.value[x])}", self.value.keys()))
+        return "{ " + contents + " }"
+
 class ListLikeAtom(Atom):
     def as_list(self) -> list:
         return self.value
+
+    def __str__(self):
+        contents = " ".join(map(str, self.value))
+        return "( " + contents + " )"
 
 @dataclass
 class ListAtom(ListLikeAtom):

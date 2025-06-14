@@ -98,11 +98,17 @@ def eval_defmacro(ast, env):
 
 def eval_try(ast, env):
     data = ast.value
+    has_catch = len(data) > 2
+
     try:
         return ast, env, EVAL(data[1], env)
     except MalException as e:
+        if not has_catch:
+            raise
         exception = e.value
-    except Exception as e:
+    except BaseException as e:
+        if not has_catch:
+            raise
         exception = StringAtom(str(e))
 
     catch = data[2].value
@@ -188,7 +194,7 @@ def _map(args):
     result = []
     for item in sequence.as_list():
         if type(fn) is dict:
-            result.append(EVAL(fn["ast"], Env(fn["env"], fn["params"], full_args)))
+            result.append(EVAL(fn["ast"], Env(fn["env"], fn["params"], [item])))
         else:
             result.append(fn.value([item]))
     return ListAtom(result)

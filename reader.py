@@ -140,7 +140,7 @@ def read_hashmap(reader: Reader):
         key = read_form(reader)
         value = read_form(reader)
         mapAtom.push(key, value)
-    raise EOFError()
+    raise EOFError("EOF")
 
 def read_listlike(reader: Reader, closing, constructor):
     reader.next()
@@ -150,7 +150,7 @@ def read_listlike(reader: Reader, closing, constructor):
             reader.next()
             return holder
         holder.push(read_form(reader))
-    raise EOFError()
+    raise EOFError("EOF")
 
 simple_tokens = {
     "nil": lambda: NilAtom(),

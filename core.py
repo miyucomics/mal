@@ -1,4 +1,4 @@
-from mal_types import AtomType, AtomAtom, BooleanAtom, FunctionAtom, IntAtom, ListAtom, ListLikeAtom, NilAtom, StringAtom, VectorAtom, MalException
+from mal_types import AtomType, AtomAtom, BooleanAtom, FunctionAtom, IntAtom, ListAtom, ListLikeAtom, NilAtom, StringAtom, VectorAtom, MalException, SymbolAtom, KeywordAtom, MapAtom
 from reader import read_str
 from printer import pr_str
 
@@ -26,6 +26,14 @@ def equal(args):
             return BooleanAtom(False)
         for x, y in zip(a.as_list(), b.as_list()):
             if not equal([x, y]).truthy():
+                return BooleanAtom(False)
+        return BooleanAtom(True)
+
+    if isinstance(a, MapAtom) and isinstance(b, MapAtom):
+        if set(a.value.keys()) != set(b.value.keys()):
+            return BooleanAtom(False)
+        for key in a.value:
+            if not equal([a.value[key], b.value[key]]).truthy():
                 return BooleanAtom(False)
         return BooleanAtom(True)
 
@@ -116,6 +124,42 @@ def rest(args):
 def mal_throw(args):
     raise MalException(get(args, 0))
 
+def _hash_map(args):
+    if len(args) % 2 != 0:
+        raise ValueError("hash-map requires even number of arguments")
+    map_atom = MapAtom()
+    for i in range(0, len(args), 2):
+        map_atom.push(args[i], args[i + 1])
+    return map_atom
+
+def _assoc(args):
+    original = treat_as(get(args, 0), AtomType.MAP)
+    map_atom = MapAtom(dict(original))
+    rest = args[1:]
+    if len(rest) % 2 != 0:
+        raise ValueError("assoc requires even number of arguments for key-value pairs after the map")
+    for i in range(0, len(rest), 2):
+        map_atom.push(rest[i], rest[i + 1])
+    return map_atom
+
+def _dissoc(args):
+    original = treat_as(get(args, 0), AtomType.MAP)
+    map_atom = MapAtom(dict(original))
+    for key in args[1:]:
+        map_atom.value.pop(key, None)
+    return map_atom
+
+def _get(args):
+    map_atom = get(args, 0)
+    if isinstance(map_atom, NilAtom):
+        return NilAtom()
+    treat_as(map_atom, AtomType.MAP)
+    return map_atom.value.get(get(args, 1), NilAtom())
+
+def _contains(args):
+    map_atom = treat_as(get(args, 0), AtomType.MAP)
+    return BooleanAtom(get(args, 1) in map_atom)
+
 core = {
     "+": lambda args: biinteger_operation(args, lambda a, b: IntAtom(a + b)),
     "-": lambda args: biinteger_operation(args, lambda a, b: IntAtom(a - b)),
@@ -159,5 +203,23 @@ core = {
         (type(get(args, 0)) is dict and get(args, 0).get("is_macro", False))
     ),
 
-    "throw": mal_throw
+    "throw": mal_throw,
+    "nil?": lambda args: BooleanAtom(isinstance(get(args, 0), NilAtom)),
+    "true?": lambda args: BooleanAtom(isinstance(get(args, 0), BooleanAtom) and get(args, 0).value is True),
+    "false?": lambda args: BooleanAtom(isinstance(get(args, 0), BooleanAtom) and get(args, 0).value is False),
+    "symbol?": lambda args: BooleanAtom(isinstance(get(args, 0), SymbolAtom)),
+    "symbol": lambda args: SymbolAtom(treat_as(get(args, 0), AtomType.STRING)),
+    "keyword": lambda args: get(args, 0) if isinstance(get(args, 0), KeywordAtom) else KeywordAtom("\u029e" + treat_as(get(args, 0), AtomType.STRING)),
+    "keyword?": lambda args: BooleanAtom(isinstance(get(args, 0), KeywordAtom)),
+    "vector": lambda args: VectorAtom(args[:]),
+    "vector?": lambda args: BooleanAtom(isinstance(get(args, 0), VectorAtom)),
+    "sequential?": lambda args: BooleanAtom(isinstance(get(args, 0), ListLikeAtom)),
+    "hash-map": lambda args: _hash_map(args),
+    "map?": lambda args: BooleanAtom(isinstance(get(args, 0), MapAtom)),
+    "assoc":       lambda args: _assoc(args),
+    "dissoc":      lambda args: _dissoc(args),
+    "get":         lambda args: _get(args),
+    "contains?":   lambda args: _contains(args),
+    "keys":        lambda args: ListAtom(list(get(args, 0).value.keys())),
+    "vals":        lambda args: ListAtom(list(get(args, 0).value.values())),
 }
