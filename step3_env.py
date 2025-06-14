@@ -86,5 +86,7 @@ while True:
         print(str(error))
     except KeyError as error:
         print(str(error))
+    except ValueError as error:
+        print(str(error))
     else:
         print(result)
