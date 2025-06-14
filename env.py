@@ -17,6 +17,6 @@ class Env:
     def get(self, symbol: SymbolAtom):
         if symbol.value not in self.data:
             if self.outer is None:
-                raise KeyError(f"'{symbol.value}' not found.")
+                raise ValueError(f"'{symbol.value}' not found")
             return self.outer.get(symbol)
         return self.data[symbol.value]

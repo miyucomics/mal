@@ -98,6 +98,9 @@ class StringAtom(Atom):
     def type(self) -> AtomType:
         return AtomType.STRING
 
+    def __str__(self) -> str:
+        return self.value
+
 @dataclass(frozen=True)
 class KeywordAtom(Atom):
     value: str
@@ -163,3 +166,7 @@ class VectorAtom(ListLikeAtom):
 
     def push(self, iota: Atom):
         self.value.append(iota)
+
+class MalException(Exception):
+    def __init__(self, value: Atom):
+        self.value = value

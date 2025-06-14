@@ -1,4 +1,4 @@
-from mal_types import AtomType, AtomAtom, BooleanAtom, FunctionAtom, IntAtom, ListAtom, ListLikeAtom, NilAtom, StringAtom, VectorAtom
+from mal_types import AtomType, AtomAtom, BooleanAtom, FunctionAtom, IntAtom, ListAtom, ListLikeAtom, NilAtom, StringAtom, VectorAtom, MalException
 from reader import read_str
 from printer import pr_str
 
@@ -113,6 +113,9 @@ def rest(args):
         return ListAtom()
     return ListAtom(seq.as_list()[1:])
 
+def mal_throw(args):
+    raise MalException(get(args, 0))
+
 core = {
     "+": lambda args: biinteger_operation(args, lambda a, b: IntAtom(a + b)),
     "-": lambda args: biinteger_operation(args, lambda a, b: IntAtom(a - b)),
@@ -155,4 +158,6 @@ core = {
         (isinstance(get(args, 0), FunctionAtom) and get(args, 0).is_macro) or
         (type(get(args, 0)) is dict and get(args, 0).get("is_macro", False))
     ),
+
+    "throw": mal_throw
 }
