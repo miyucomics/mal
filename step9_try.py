@@ -2,7 +2,7 @@ import readline
 from reader import read_str
 from printer import pr_str
 from mal_types import AtomType, FunctionAtom, ListAtom, MapAtom, NilAtom, SymbolAtom, VectorAtom, StringAtom, ListLikeAtom, MalException
-from core import core
+from core import core, get
 from env import Env
 from os.path import exists
 import sys
@@ -173,7 +173,30 @@ def rep(arg):
     result = EVAL(ast, repl_env)
     return pr_str(result, True)
 
+def _apply(args):
+    fn = get(args, 0)
+    last = get(args, -1)
+    middle = args[1:-1]
+    full_args = middle + last.as_list()
+    if type(fn) is dict:
+        return EVAL(fn["ast"], Env(fn["env"], fn["params"], full_args))
+    return fn.value(full_args)
+
+def _map(args):
+    fn = get(args, 0)
+    sequence = get(args, 1)
+    result = []
+    for item in sequence.as_list():
+        if type(fn) is dict:
+            result.append(EVAL(fn["ast"], Env(fn["env"], fn["params"], full_args)))
+        else:
+            result.append(fn.value([item]))
+    return ListAtom(result)
+
 repl_env.set(SymbolAtom("eval"), FunctionAtom(lambda ast: EVAL(ast[0], repl_env)))
+repl_env.set(SymbolAtom("apply"), FunctionAtom(lambda args: _apply(args)))
+repl_env.set(SymbolAtom("map"), FunctionAtom(lambda args: _map(args)))
+
 rep('(def! not (fn* (a) (if a false true)))')
 rep('(def! load-file (fn* (f) (eval (read-string (str "(do " (slurp f) "\nnil)")))))')
 rep("(defmacro! cond (fn* (& xs) (if (> (count xs) 0) (list 'if (first xs) (if (> (count xs) 1) (nth xs 1) (throw \"odd number of forms to cond\")) (cons 'cond (rest (rest xs)))))))")
