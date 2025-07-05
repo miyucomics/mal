@@ -67,7 +67,7 @@ def tokenize(code: str):
                 token += new_char
                 position += 1
             else:
-                raise EOFError()
+                raise EOFError("EOF")
             tokens.append(f'"{token}"')
 
         if char == ';':
@@ -80,6 +80,7 @@ def tokenize(code: str):
                     break
                 token += new_char
                 position += 1
+            continue
 
         token = ""
         while position < len(code):
