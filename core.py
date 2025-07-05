@@ -1,6 +1,7 @@
 from mal_types import AtomType, AtomAtom, BooleanAtom, FunctionAtom, IntAtom, ListAtom, ListLikeAtom, NilAtom, StringAtom, VectorAtom, MalException, SymbolAtom, KeywordAtom, MapAtom
 from reader import read_str
 from printer import pr_str
+import time
 
 def get(args, index):
     if index >= len(args):
@@ -166,6 +167,29 @@ def readline(args):
     except EOFError:
         return NilAtom()
 
+def seq(args):
+    atom = get(args, 0)
+    if isinstance(atom, NilAtom):
+        return NilAtom()
+    if isinstance(atom, StringAtom):
+        if len(atom.value) == 0:
+            return NilAtom()
+        return ListAtom([StringAtom(c) for c in atom.value])
+    if isinstance(atom, ListLikeAtom):
+        if len(atom.as_list()) == 0:
+            return NilAtom()
+        return ListAtom(atom.as_list()[:])
+    raise ValueError("seq can not support this type")
+
+def conj(args):
+    collection = get(args, 0)
+    items = args[1:]
+    if isinstance(collection, ListAtom):
+        return ListAtom(items[::-1] + collection.as_list()[:])
+    if isinstance(collection, VectorAtom):
+        return VectorAtom(collection.as_list()[:] + items)
+    raise ValueError("conj can not support this type")
+
 def unimplemented():
     raise ValueError("Unimplemented")
 
@@ -233,7 +257,7 @@ core = {
     "vals": lambda args: ListAtom(list(get(args, 0).value.values())),
 
     "readline": readline,
-    "time-ms": unimplemented,
+    "time-ms": lambda args: IntAtom(int(time.time() * 1000)),
     "meta": unimplemented,
     "with-meta": unimplemented,
     "fn?": lambda args: BooleanAtom(
@@ -242,6 +266,6 @@ core = {
     ),
     "string?": lambda args: BooleanAtom(isinstance(get(args, 0), StringAtom)),
     "number?": lambda args: BooleanAtom(isinstance(get(args, 0), IntAtom)),
-    "seq": unimplemented,
-    "conj": unimplemented,
+    "seq": seq,
+    "conj": conj,
 }

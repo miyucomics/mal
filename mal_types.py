@@ -145,10 +145,6 @@ class ListLikeAtom(Atom):
     def as_list(self) -> list:
         return self.value
 
-    def __str__(self):
-        contents = " ".join(map(str, self.value))
-        return "( " + contents + " )"
-
 @dataclass
 class ListAtom(ListLikeAtom):
     value: list[Atom] = None
@@ -162,6 +158,10 @@ class ListAtom(ListLikeAtom):
     def push(self, iota: Atom):
         self.value.append(iota)
 
+    def __str__(self):
+        contents = " ".join(map(str, self.value))
+        return "( " + contents + " )"
+
 @dataclass
 class VectorAtom(ListLikeAtom):
     value: list[Atom] = None
@@ -174,6 +174,10 @@ class VectorAtom(ListLikeAtom):
 
     def push(self, iota: Atom):
         self.value.append(iota)
+
+    def __str__(self):
+        contents = " ".join(map(str, self.value))
+        return "[ " + contents + " ]"
 
 class MalException(Exception):
     def __init__(self, value: Atom):
