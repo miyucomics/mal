@@ -90,9 +90,9 @@ def eval_defmacro(ast, env):
     data = ast.value
     value = EVAL(data[2], env)
     if isinstance(value, FunctionAtom):
-        value.is_macro = True
+        value = FunctionAtom(value.value, is_macro=True)
     elif type(value) is dict:
-        value["is_macro"] = True
+        value = {**value, "is_macro": True}
     env.set(data[1], value)
     return ast, env, value
 
