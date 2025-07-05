@@ -160,6 +160,15 @@ def _contains(args):
     map_atom = treat_as(get(args, 0), AtomType.MAP)
     return BooleanAtom(get(args, 1) in map_atom)
 
+def readline(args):
+    try:
+        return StringAtom(input(treat_as(get(args, 0), AtomType.STRING)))
+    except EOFError:
+        return NilAtom()
+
+def unimplemented():
+    raise ValueError("Unimplemented")
+
 core = {
     "+": lambda args: biinteger_operation(args, lambda a, b: IntAtom(a + b)),
     "-": lambda args: biinteger_operation(args, lambda a, b: IntAtom(a - b)),
@@ -216,10 +225,23 @@ core = {
     "sequential?": lambda args: BooleanAtom(isinstance(get(args, 0), ListLikeAtom)),
     "hash-map": lambda args: _hash_map(args),
     "map?": lambda args: BooleanAtom(isinstance(get(args, 0), MapAtom)),
-    "assoc":       lambda args: _assoc(args),
-    "dissoc":      lambda args: _dissoc(args),
-    "get":         lambda args: _get(args),
-    "contains?":   lambda args: _contains(args),
-    "keys":        lambda args: ListAtom(list(get(args, 0).value.keys())),
-    "vals":        lambda args: ListAtom(list(get(args, 0).value.values())),
+    "assoc": lambda args: _assoc(args),
+    "dissoc": lambda args: _dissoc(args),
+    "get": lambda args: _get(args),
+    "contains?": lambda args: _contains(args),
+    "keys": lambda args: ListAtom(list(get(args, 0).value.keys())),
+    "vals": lambda args: ListAtom(list(get(args, 0).value.values())),
+
+    "readline": readline,
+    "time-ms": unimplemented,
+    "meta": unimplemented,
+    "with-meta": unimplemented,
+    "fn?": lambda args: BooleanAtom(
+        (type(get(args, 0)) is dict and not get(args, 0).get("is_macro", False)) or
+        (isinstance(get(args, 0), FunctionAtom) and not get(args, 0).is_macro)
+    ),
+    "string?": lambda args: BooleanAtom(isinstance(get(args, 0), StringAtom)),
+    "number?": lambda args: BooleanAtom(isinstance(get(args, 0), IntAtom)),
+    "seq": unimplemented,
+    "conj": unimplemented,
 }
