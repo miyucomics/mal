@@ -1,1 +1,3 @@
-This is my personal attempt at making a lisp, following MAL. It is done in Python3, attempting to use minimal external code even from the standard library for educational purposes, and is likely not particularly fast. All code here is under MIT License should you want it for some reason.
+This is my completed implementation of [Make-A-Lisp](https://github.com/kanaka/mal), following along in Python 3. For educational purposes, I refrained from using code outside the standard library and even avoided as many external code imports as possible. All code here is freely given under the MIT license.
+
+This version is able to pass every single unit test that MAL provides, and it is able to self-host a MAL interpreter written in MAL.
