@@ -53,6 +53,8 @@ def eval_fn(ast, env):
         "ast": data[2],
         "params": data[1].value,
         "env": env,
+        "is_macro": False,
+        "meta": None,
         "fn": FunctionAtom(lambda args: EVAL(data[2], Env(env, data[1].value, args)))
     }
 

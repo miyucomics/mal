@@ -1,4 +1,4 @@
-from mal_types import AtomType, AtomAtom, BooleanAtom, FunctionAtom, IntAtom, ListAtom, ListLikeAtom, NilAtom, StringAtom, VectorAtom, MalException, SymbolAtom, KeywordAtom, MapAtom
+from mal_types import AtomType, AtomAtom, BooleanAtom, FunctionAtom, IntAtom, ListAtom, ListLikeAtom, NilAtom, StringAtom, VectorAtom, MalException, SymbolAtom, KeywordAtom, MapAtom, WithMeta
 from reader import read_str
 from printer import pr_str
 import time
@@ -190,8 +190,22 @@ def conj(args):
         return VectorAtom(collection.as_list()[:] + items)
     raise ValueError("conj can not support this type")
 
-def unimplemented():
-    raise ValueError("Unimplemented")
+def with_meta(args):
+    atom = get(args, 0)
+    meta = get(args, 1)
+    if isinstance(atom, WithMeta):
+        return atom.with_meta(meta)
+    if type(atom) is dict:
+        return {**atom, "meta": meta}
+    raise ValueError("with-meta can not support this type")
+
+def meta(args):
+    atom = get(args, 0)
+    if isinstance(atom, WithMeta):
+        return atom.meta or NilAtom()
+    if type(atom) is dict:
+        return atom.get("meta") or NilAtom()
+    return NilAtom()
 
 core = {
     "+": lambda args: biinteger_operation(args, lambda a, b: IntAtom(a + b)),
@@ -258,8 +272,8 @@ core = {
 
     "readline": readline,
     "time-ms": lambda args: IntAtom(int(time.time() * 1000)),
-    "meta": unimplemented,
-    "with-meta": unimplemented,
+    "meta": meta,
+    "with-meta": with_meta,
     "fn?": lambda args: BooleanAtom(
         (type(get(args, 0)) is dict and not get(args, 0).get("is_macro", False)) or
         (isinstance(get(args, 0), FunctionAtom) and not get(args, 0).is_macro)

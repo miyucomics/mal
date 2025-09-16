@@ -33,6 +33,11 @@ class Atom:
     def __str__(self) -> str:
         raise NotImplementedError()
 
+class WithMeta:
+    meta: Atom = None
+    def with_meta(self, meta: Atom) -> Atom:
+        raise NotImplementedError()
+
 @dataclass
 class AtomAtom(Atom):
     value: Atom
@@ -112,9 +117,13 @@ class KeywordAtom(Atom):
         return f':{self.value[1:]}'
 
 @dataclass
-class FunctionAtom(Atom):
+class FunctionAtom(Atom, WithMeta):
     value: Any
     is_macro: bool = False
+    meta: Atom = None
+
+    def with_meta(self, meta):
+        return FunctionAtom(self.value, self.is_macro, meta)
 
     def type(self) -> AtomType:
         return AtomType.FUNCTION
@@ -123,11 +132,15 @@ class FunctionAtom(Atom):
         return "#<function>"
 
 @dataclass
-class MapAtom(Atom):
+class MapAtom(Atom, WithMeta):
     value: dict[Atom, Atom] = None
+    meta: Atom = None
 
     def __post_init__(self):
         self.value = self.value or {}
+
+    def with_meta(self, meta):
+        return MapAtom(dict(self.value), meta)
 
     def type(self) -> AtomType:
         return AtomType.MAP
@@ -146,11 +159,15 @@ class ListLikeAtom(Atom):
         return self.value
 
 @dataclass
-class ListAtom(ListLikeAtom):
+class ListAtom(ListLikeAtom, WithMeta):
     value: list[Atom] = None
+    meta: Atom = None
 
     def __post_init__(self):
         self.value = self.value or []
+
+    def with_meta(self, meta):
+        return ListAtom(self.value[:], meta)
 
     def type(self) -> AtomType:
         return AtomType.LIST
@@ -163,11 +180,15 @@ class ListAtom(ListLikeAtom):
         return "( " + contents + " )"
 
 @dataclass
-class VectorAtom(ListLikeAtom):
+class VectorAtom(ListLikeAtom, WithMeta):
     value: list[Atom] = None
+    meta: Atom = None
 
     def __post_init__(self):
         self.value = self.value or []
+
+    def with_meta(self, meta):
+        return VectorAtom(self.value[:], meta)
 
     def type(self) -> AtomType:
         return AtomType.VECTOR
